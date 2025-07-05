@@ -71,131 +71,131 @@
     <svg id="map" width="720" height="720"></svg>
 
     <script type="module">
-      import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+      import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
 
-      let filename = null;
+      let filename = null
 
-      init();
+      init()
 
       function init() {
-        setupFileInput();
-        setupDownloadButton();
-        disableDownloadButton();
+        setupFileInput()
+        setupDownloadButton()
+        disableDownloadButton()
       }
 
       function setupFileInput() {
-        const fileInput = document.getElementById("file");
+        const fileInput = document.getElementById("file")
         fileInput.addEventListener("change", (event) => {
-          filename = null;
-          disableDownloadButton();
+          filename = null
+          disableDownloadButton()
 
-          const file = event.target.files[0];
-          if (!file) return;
+          const file = event.target.files[0]
+          if (!file) return
 
-          const reader = new FileReader();
+          const reader = new FileReader()
 
           reader.onload = (e) => {
-            const parser = new DOMParser();
+            const parser = new DOMParser()
             const xmlDoc = parser.parseFromString(
               e.target.result,
-              "application/xml"
-            );
-            const trackpoints = Array.from(xmlDoc.querySelectorAll("trkpt"));
+              "application/xml",
+            )
+            const trackpoints = Array.from(xmlDoc.querySelectorAll("trkpt"))
             const data = trackpoints.map((tp) => ({
               lat: parseFloat(tp.getAttribute("lat")),
               lng: parseFloat(tp.getAttribute("lon")),
-            }));
-            clearSVG();
-            drawSVG(data);
+            }))
+            clearSVG()
+            drawSVG(data)
 
-            filename = file.name;
-            enableDownloadButton();
-          };
+            filename = file.name
+            enableDownloadButton()
+          }
 
-          reader.readAsText(file);
-        });
+          reader.readAsText(file)
+        })
       }
 
       function disableDownloadButton() {
-        const downloadButton = document.getElementById("download");
-        downloadButton.setAttribute("disabled", "");
+        const downloadButton = document.getElementById("download")
+        downloadButton.setAttribute("disabled", "")
       }
 
       function enableDownloadButton() {
-        const downloadButton = document.getElementById("download");
-        downloadButton.removeAttribute("disabled");
+        const downloadButton = document.getElementById("download")
+        downloadButton.removeAttribute("disabled")
       }
 
       function setupDownloadButton() {
-        const downloadButton = document.getElementById("download");
+        const downloadButton = document.getElementById("download")
         downloadButton.addEventListener("click", () => {
-          const svgElement = document.getElementById("map");
-          if (!svgElement) return;
+          const svgElement = document.getElementById("map")
+          if (!svgElement) return
 
-          const serializer = new XMLSerializer();
-          const svgString = serializer.serializeToString(svgElement);
+          const serializer = new XMLSerializer()
+          const svgString = serializer.serializeToString(svgElement)
 
-          const blob = new Blob([svgString], { type: "image/svg+xml" });
-          const url = URL.createObjectURL(blob);
+          const blob = new Blob([svgString], { type: "image/svg+xml" })
+          const url = URL.createObjectURL(blob)
 
-          const a = document.createElement("a");
-          a.href = url;
+          const a = document.createElement("a")
+          a.href = url
           a.download = filename
             ? filename.replace(/\.gpx$/, ".svg")
-            : "track.svg";
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        });
+            : "track.svg"
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+        })
       }
 
       function clearSVG() {
-        d3.select("#track").remove();
-        d3.select("#start").remove();
-        d3.select("#end").remove();
+        d3.select("#track").remove()
+        d3.select("#start").remove()
+        d3.select("#end").remove()
       }
 
       function drawSVG(data) {
-        const svg = d3.select("#map");
+        const svg = d3.select("#map")
 
-        const svgWidth = +svg.attr("width");
-        const svgHeight = +svg.attr("height");
-        const padding = 20;
+        const svgWidth = +svg.attr("width")
+        const svgHeight = +svg.attr("height")
+        const padding = 20
 
-        const projection = d3.geoMercator().scale(1).translate([0, 0]);
-        const projectedPoints = data.map((d) => projection([d.lng, d.lat]));
+        const projection = d3.geoMercator().scale(1).translate([0, 0])
+        const projectedPoints = data.map((d) => projection([d.lng, d.lat]))
 
-        const xValues = projectedPoints.map((p) => p[0]);
-        const yValues = projectedPoints.map((p) => p[1]);
+        const xValues = projectedPoints.map((p) => p[0])
+        const yValues = projectedPoints.map((p) => p[1])
 
-        const minX = Math.min(...xValues);
-        const maxX = Math.max(...xValues);
-        const minY = Math.min(...yValues);
-        const maxY = Math.max(...yValues);
+        const minX = Math.min(...xValues)
+        const maxX = Math.max(...xValues)
+        const minY = Math.min(...yValues)
+        const maxY = Math.max(...yValues)
 
-        const dataWidth = maxX - minX;
-        const dataHeight = maxY - minY;
+        const dataWidth = maxX - minX
+        const dataHeight = maxY - minY
 
         const scale = Math.min(
           (svgWidth - 2 * padding) / dataWidth,
-          (svgHeight - 2 * padding) / dataHeight
-        );
+          (svgHeight - 2 * padding) / dataHeight,
+        )
 
-        const translateX = (svgWidth - scale * (minX + maxX)) / 2;
-        const translateY = (svgHeight - scale * (minY + maxY)) / 2;
+        const translateX = (svgWidth - scale * (minX + maxX)) / 2
+        const translateY = (svgHeight - scale * (minY + maxY)) / 2
 
-        projection.scale(scale).translate([translateX, translateY]);
+        projection.scale(scale).translate([translateX, translateY])
 
         const lineGenerator = d3
           .line()
           .x((d) => projection([d.lng, d.lat])[0])
           .y((d) => projection([d.lng, d.lat])[1])
-          .curve(d3.curveCatmullRom);
+          .curve(d3.curveCatmullRom)
 
-        drawTrack({ svg, data, lineGenerator });
-        drawStart({ svg, data, projection });
-        drawEnd({ svg, data, projection });
+        drawTrack({ svg, data, lineGenerator })
+        drawStart({ svg, data, projection })
+        drawEnd({ svg, data, projection })
       }
 
       function drawTrack({ svg, data, lineGenerator }) {
@@ -206,25 +206,25 @@
           .attr("d", lineGenerator)
           .attr("fill", "none")
           .attr("stroke", "black")
-          .attr("stroke-width", 3);
+          .attr("stroke-width", 3)
       }
 
       function drawStart({ svg, data, projection }) {
-        const p0 = projection([data[0].lng, data[0].lat]);
-        const p1 = projection([data[1].lng, data[1].lat]);
+        const p0 = projection([data[0].lng, data[0].lat])
+        const p1 = projection([data[1].lng, data[1].lat])
 
-        const dx = p1[0] - p0[0];
-        const dy = p1[1] - p0[1];
+        const dx = p1[0] - p0[0]
+        const dy = p1[1] - p0[1]
 
-        const length = Math.sqrt(dx * dx + dy * dy);
-        const ux = dy / length;
-        const uy = -dx / length;
+        const length = Math.sqrt(dx * dx + dy * dy)
+        const ux = dy / length
+        const uy = -dx / length
 
-        const lineLength = 20;
-        const x0 = p0[0] - (ux * lineLength) / 2;
-        const y0 = p0[1] - (uy * lineLength) / 2;
-        const x1 = p0[0] + (ux * lineLength) / 2;
-        const y1 = p0[1] + (uy * lineLength) / 2;
+        const lineLength = 20
+        const x0 = p0[0] - (ux * lineLength) / 2
+        const y0 = p0[1] - (uy * lineLength) / 2
+        const x1 = p0[0] + (ux * lineLength) / 2
+        const y1 = p0[1] + (uy * lineLength) / 2
 
         svg
           .append("line")
@@ -234,29 +234,29 @@
           .attr("x2", x1)
           .attr("y2", y1)
           .attr("stroke", "black")
-          .attr("stroke-width", 4);
+          .attr("stroke-width", 4)
       }
 
       function drawEnd({ svg, data, projection }) {
         const pEnd = projection([
           data[data.length - 1].lng,
           data[data.length - 1].lat,
-        ]);
+        ])
 
-        const r = 8;
+        const r = 8
 
         const diamondPath =
           `M ${pEnd[0]} ${pEnd[1] - r} ` +
           `L ${pEnd[0] + r} ${pEnd[1]} ` +
           `L ${pEnd[0]} ${pEnd[1] + r} ` +
           `L ${pEnd[0] - r} ${pEnd[1]} ` +
-          `Z`;
+          `Z`
 
         svg
           .append("path")
           .attr("id", "end")
           .attr("d", diamondPath)
-          .attr("fill", "black");
+          .attr("fill", "black")
       }
     </script>
   </body>
