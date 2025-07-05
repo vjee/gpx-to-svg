@@ -49,6 +49,15 @@
         border: 2px solid var(--border);
         border-radius: 4px;
       }
+
+      svg #track,
+      svg #start {
+        stroke: var(--text);
+      }
+
+      svg #end {
+        fill: var(--text);
+      }
     </style>
   </head>
   <body>
@@ -124,8 +133,7 @@
           if (!svgElement) return;
 
           const serializer = new XMLSerializer();
-          let svgString = serializer.serializeToString(svgElement);
-          svgString = svgString.replace(/var\(--text\)/g, "black");
+          const svgString = serializer.serializeToString(svgElement);
 
           const blob = new Blob([svgString], { type: "image/svg+xml" });
           const url = URL.createObjectURL(blob);
@@ -196,7 +204,7 @@
           .attr("id", "track")
           .attr("d", lineGenerator)
           .attr("fill", "none")
-          .attr("stroke", "var(--text)")
+          .attr("stroke", "black")
           .attr("stroke-width", 3);
       }
 
@@ -224,7 +232,7 @@
           .attr("y1", y0)
           .attr("x2", x1)
           .attr("y2", y1)
-          .attr("stroke", "var(--text)")
+          .attr("stroke", "black")
           .attr("stroke-width", 4);
       }
 
@@ -247,7 +255,7 @@
           .append("path")
           .attr("id", "end")
           .attr("d", diamondPath)
-          .attr("fill", "var(--text)");
+          .attr("fill", "black");
       }
     </script>
   </body>
