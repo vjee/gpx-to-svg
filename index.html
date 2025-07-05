@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GPX to SVG</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "d3-selection": "https://cdn.jsdelivr.net/npm/d3-selection@3/+esm",
+          "d3-geo": "https://cdn.jsdelivr.net/npm/d3-geo@3/+esm",
+          "d3-shape": "https://cdn.jsdelivr.net/npm/d3-shape@3/+esm"
+        }
+      }
+    </script>
+
     <style>
       :root {
         --bg: #f0f0f0;
@@ -71,7 +81,9 @@
     <svg id="map" width="720" height="720"></svg>
 
     <script type="module">
-      import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
+      import { select } from "d3-selection"
+      import { geoMercator } from "d3-geo"
+      import { line, curveCatmullRom } from "d3-shape"
 
       let filename = null
 
@@ -151,19 +163,19 @@
       }
 
       function clearSVG() {
-        d3.select("#track").remove()
-        d3.select("#start").remove()
-        d3.select("#end").remove()
+        select("#track").remove()
+        select("#start").remove()
+        select("#end").remove()
       }
 
       function drawSVG(data) {
-        const svg = d3.select("#map")
+        const svg = select("#map")
 
         const svgWidth = +svg.attr("width")
         const svgHeight = +svg.attr("height")
         const padding = 20
 
-        const projection = d3.geoMercator().scale(1).translate([0, 0])
+        const projection = geoMercator().scale(1).translate([0, 0])
         const projectedPoints = data.map((d) => projection([d.lng, d.lat]))
 
         const xValues = projectedPoints.map((p) => p[0])
@@ -187,11 +199,10 @@
 
         projection.scale(scale).translate([translateX, translateY])
 
-        const lineGenerator = d3
-          .line()
+        const lineGenerator = line()
           .x((d) => projection([d.lng, d.lat])[0])
           .y((d) => projection([d.lng, d.lat])[1])
-          .curve(d3.curveCatmullRom)
+          .curve(curveCatmullRom)
 
         drawTrack({ svg, data, lineGenerator })
         drawStart({ svg, data, projection })
