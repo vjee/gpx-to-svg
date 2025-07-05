@@ -190,7 +190,8 @@
         const lineGenerator = d3
           .line()
           .x((d) => projection([d.lng, d.lat])[0])
-          .y((d) => projection([d.lng, d.lat])[1]);
+          .y((d) => projection([d.lng, d.lat])[1])
+          .curve(d3.curveCatmullRom);
 
         drawTrack({ svg, data, lineGenerator });
         drawStart({ svg, data, projection });
